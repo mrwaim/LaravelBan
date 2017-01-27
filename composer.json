@@ -1,0 +1,24 @@
+{
+    "name": "klsandbox/banned-keywords-checker",
+    "description": "Banned keyword checker for Laravel , this package provide search keyword(s) inside the files",
+    "require": {
+        "php": "^5.3.3 | ^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7",
+        "whatthejeff/nyancat-phpunit-resultprinter": "~1.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ibrahim Abdul Rahim",
+            "email": "ibrahim@klsandbox.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Klsandbox\\BannedKeywordsChecker\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
