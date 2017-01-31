@@ -45,19 +45,16 @@ class LaravelBan extends Command
      */
     public function handle()
     {
-
-        $directories = $this->check_config(config('banned-keywords.directory'));
-        $keywords = $this->check_config(config('banned-keywords.keywords'));
+        $this->check_config();
 
         $keyword = $this->argument('keyword');
 
-        if ($keyword) {
-            $keywords = [$keyword];
+        $rules_count = sizeof(config('banned-keywords'));
+
+        for ($i=0; $i < $rules_count; $i++) { 
+            $this->ban_searcher($i , $keyword);
         }
 
-        foreach ($directories as $directory) {
-            $this->run_directory($directory, $keywords);
-        }
 
         if ($this->show_warning) {
             $response_mode = $this->option('mode') == 'strict' ? 'error' : 'info' ;
@@ -67,52 +64,90 @@ class LaravelBan extends Command
         }
     }
 
+
     /**
      * check if the config has been publish or not
      * @param  array $config the array inside the config
      * @return array         the array inside the config
      */
-    private function check_config($config)
+    private function check_config()
     {
-        if (is_null($config)) {
+        if (is_null(config('banned-keywords'))) {
             $this->error("\n Please publish the config first, using php artisan vendor:publish ");
             exit();
         }
-        return $config;
     }
+
+
+    /**
+     * search the banned keyword
+     * @param  int   $rule_id   the rule id on the config
+     * @param  string $keyword  the keyword need to be fine, if null will search the keyword form the config
+     * @return void
+     */
+    private function ban_searcher($rule_id , $keyword = null)
+    {
+        $directories = config("banned-keywords.$rule_id.folders");
+        $keywords = config("banned-keywords.$rule_id.keywords");
+
+        if ($keyword) {
+            $keywords = [$keyword];
+        }
+
+        foreach ($directories as $directory) {
+            $this->run_directory($directory, $keywords , $rule_id);
+        }
+    }
+
 
     /**
      * run through the specified directory
      * @param  string $directory the directory need to be search
      * @param  array  $keywords  keyword need to be search
+     * @param  int   $rule_id   the rule id on the config
      * @return void            
      */
-    private function run_directory($directory , array $keywords)
+    private function run_directory($directory , array $keywords, $rule_id)
     {
+        
+        $files = $this->get_searchable_files($directory);
+            
+        $files = $this->exclude_file($files, $rule_id);
+
+        foreach ($files as $file) {
+                $data = $this->find_keyword( $directory.$file , $keywords);
+                $this->show_table($data , config("banned-keywords.$rule_id.name"));  
+        }
+    }
+
+
+    /**
+     * get the file that searchabele
+     * @param  string $directory the path need to be search
+     * @return array             the name list of file available
+     */
+    private function get_searchable_files($directory)
+    {
+        $files = [];
         if ($directory) {
             foreach (new \DirectoryIterator($directory) as $file) {
               if ($file->isFile()) {
                   $files[] = $file->getFilename();
               }
             }
-
-            $files = $this->exclude_file($files);
-            
-            foreach ($files as $file) {
-                    $data = $this->find_keyword( $directory.$file , $keywords);
-                    $this->show_table($data);  
-            }
         }
+        return $files;
     }
 
     /**
      * this should exclude file(s) that didnt need to be search for keyword(s) within the directory
      * @param  array $file_list original file list need to be search
+     * @param  int   $rule_id   the rule id on the config
      * @return array            the file list that has been filtered
      */
-    private function exclude_file($file_list)
+    private function exclude_file($file_list, $rule_id)
     {
-        $files = $this->check_config(config('banned-keywords.excepts'));
+        $files = config("banned-keywords.$rule_id.excepts");
         if ($files) {
             foreach ($files as $file) {
                 unset($file_list[array_search($file, $file_list)]);  
@@ -147,9 +182,10 @@ class LaravelBan extends Command
      * @param  array  $data the data from search 
      * @return void
      */
-    private function show_table(array $data)
+    private function show_table(array $data , $rule_name)
     {
         if ($data) {
+            $this->info("\n $rule_name");
             $this->info("\n".$data[0]['file']);
             $headers = ['Keywords', 'Count'];
 
@@ -159,7 +195,8 @@ class LaravelBan extends Command
 
             $this->table($headers, $data); 
 
-            $this->show_warning = true;  
+            $this->show_warning = true;
         }
+
     }
 }
