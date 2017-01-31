@@ -6,7 +6,21 @@ This is a package to check some of the keyword being used in files inside folder
 `composer require klsandbox/laravelban`
 
 ## How To Use
-After installing via composer, publish the config simply by using publish command
+After installing via composer, add the LaravelBanServiceProvider as one of the provider inside the config/app.php 
+
+```
+config/app.php
+
+
+ 'providers' => [
+ ....
+ ....       
+        Klsandbox\LaravelBan\LaravelBanServiceProvider::class,
+
+
+```
+
+then, publish the config simply by using publish command
 
 `php artisan vendor:publish`
 
