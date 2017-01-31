@@ -1,26 +1,22 @@
 <?php
 
 return [
+    
+    [
+        "name" => "Ban User Keywords",
 
-    /**
-     * this are the restricted word(s)
-     */
-    'keywords' => [
-        //'User',
+        "keywords" => [
+         //   "User" , 
+         //   "Schema\DB",
+        ],
+
+        "folders" => [
+           // "app/Http/Controllers/Auth/",
+        ],
+
+        "excepts" => [
+           //"RegisterController.php", 
+        ],
     ],
-
-    /**
-     * check this director(y/ies)
-     */
-    'directory' => [
-        //'app/Http/Controllers/Auth/',
-    ],
-
-    /**
-     * exclude these files from being search
-     */
-    'excepts' => [
-        //'RegisterController.php',
-    ],
-
+    //copy above config to add more rule
 ];
