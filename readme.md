@@ -3,7 +3,7 @@
 This is a package to check some of the keyword being used in files inside folder. This package are developed on Laravel 5.
 
 ## Install using composer
-`composer require klsandbox/banned-keywords-checker`
+`composer require klsandbox/laravelban`
 
 ## How To Use
 After installing via composer, publish the config simply by using publish command
